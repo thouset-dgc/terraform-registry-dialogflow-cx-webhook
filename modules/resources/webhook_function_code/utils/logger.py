@@ -1,7 +1,9 @@
 import logging
+import os
+
 import google.cloud.logging
 from google.cloud.logging.handlers import CloudLoggingHandler
-import os
+
 
 def get_logger(name: str = "default_logger"):
     """
@@ -31,7 +33,7 @@ def get_logger(name: str = "default_logger"):
         else:
             # Add a StreamHandler for local testing
             console_handler = logging.StreamHandler()
-            console_handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+            console_handler.setFormatter(logging.Formatter("[%(name)s] [%(levelname)s] %(message)s"))
             logger.addHandler(console_handler)
 
     return logger
