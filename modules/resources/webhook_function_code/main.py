@@ -1,11 +1,11 @@
 from flask import Request
 from utils.factory import HandlerFactory
 from utils.helpers import get_tag, make_response
-
-import logging
+from utils.logger import get_logger
 
 factory = HandlerFactory()
 
+logger = get_logger("webhook")
 
 def webhook_entrypoint(request: Request):
     """
@@ -23,31 +23,33 @@ def webhook_entrypoint(request: Request):
     """
     try:
         request_data = request.get_json()
+        logger.info(f"Received request: {request_data}")
+
         tag = get_tag(request_data)
+
         handler = factory(tag)
 
         response_data = handler(request_data)
 
         # Build response with dynamic status (succeed)
-        return make_response(tag=tag, **response_data)
+        response = make_response(tag=tag, **response_data)
 
     except Exception as e:
         error_type = type(e).__name__
-        logging.error(f"{error_type}: {e}")
+        logger.error(f"An error occurred: {error_type}: {e}")
 
         # Build response with dynamic status (failed)
         error_parameters = {"error_log": f"{error_type}: {e}"}
-        return make_response(tag=tag, parameters=error_parameters, status="failed")
+        response = make_response(tag=tag, parameters=error_parameters, status="failed")
 
+    logger.info(f"Sending response: {response}")
+
+    return response
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Starting webhook server.")
 
     data = {"fulfillmentInfo": {"tag": "example"}}
 
     request = Request.from_values(json=data)
 
-    response = webhook_entrypoint(request)
-
-    logging.info(response)
+    webhook_entrypoint(request)
