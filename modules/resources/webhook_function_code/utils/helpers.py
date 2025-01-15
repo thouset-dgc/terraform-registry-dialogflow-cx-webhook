@@ -1,4 +1,10 @@
-import json
+from schemas.dialogflow import (
+    DialogflowResponse,
+    TextMessage,
+    MessagePayload,
+    ConditionalPayload,
+)
+from typing import Dict, List, Optional
 
 
 def get_tag(query: dict) -> str:
@@ -27,7 +33,7 @@ def get_tag(query: dict) -> str:
             "No 'tag' found in fullfillmentInfo. Check Dialogflow CX webhook settings or input data."
         )
     except Exception as e:
-        import logging 
+        import logging
 
         logging.exception(f"An unexpected error occured : {e}")
         raise
@@ -36,73 +42,86 @@ def get_tag(query: dict) -> str:
 
 
 def make_response(
-    parameters: dict = None,
-    message_text: list[str] = None,
-    message_payload: list[dict] = None,
-    message_conditional_payload: dict = None,
-    error: dict = None
+    tag: str,
+    parameters: Optional[Dict] = None,
+    message_text: Optional[List[str]] = None,
+    message_payload: Optional[List[Dict]] = None,
+    message_conditional_payload: Optional[Dict] = None,
+    status: str = "succeed",  # Defaults to "succeed" unless explicitly failed
 ) -> str:
-    """Builds a response for Dialogflow CX.
+    """
+    Constructs a Dialogflow CX webhook response based on the provided parameters.
 
-    Constructs a response with parameters, text messages, or payloads.  At least one
-    of `parameters`, `message_text`, or `message_payload` must be provided.
-        Args:
-            parameters (dict, optional): Session parameters.
-            message_text (list[str], optional): List of text messages.
-            message_payload (list[dict], optional): List of payload messages.
-            message_conditional_payload (dict, optional): Dictionary for conditional payloads.
+    This function constructs a Dialogflow CX webhook response using the provided parameters and fullfillment messages.
+    A dynamic status key is added to the parameters to indicate the status of the response and will default to "succeed"
+    unless explicitly failed. If any errors occur during the construction of the response, a default error response is 
+    returned with the error message in order to provide a response to Dialogflow CX.
 
-        Returns:
-            str: A JSON string representing the Dialogflow CX response.
+    Args:
+        tag (str): The tag associated with the Dialogflow CX intent.
+        parameters (Optional[Dict]): The parameters to include in the response.
+        message_text (Optional[List[str]]): The text messages to include in the response.
+        message_payload (Optional[List[Dict]]): The payload messages to include in the response.
+        message_conditional_payload (Optional[Dict]): The conditional payload message to include in the response.
+        status (str): The status of the response, defaults to "succeed".
 
-        Raises:
-            ValueError: If no parameters, message_text, or message_payload are provided.
-            TypeError: If parameters, message_text, or message_payload have incorrect types.
+    Returns:
+        str: The JSON string representation of the Dialogflow CX webhook response.
 
     """
-    if error :
-        return json.dumps(error)
 
-    if not any([parameters, message_text, message_payload]):
-        return json.dumps(
-            {
-                "error": {
-                    "code" : "",
-                    "message": "At least one of 'parameters', 'message_text', or 'message_payload' must be provided."
-                }
-            }
-        )
-        raise ValueError(
-            "At least one of 'parameters', 'message_text', or 'message_payload' must be provided."
-        )
+    dynamic_status_key = f"{tag}_status"
+    try:
+        parameters = parameters or {}
+        parameters[dynamic_status_key] = status
 
-    if parameters is not None and not isinstance(parameters, dict):
-        raise TypeError(f"Expected 'parameters' to be a dict, got {type(parameters)}")
-    if message_text is not None and not isinstance(message_text, list):
-        raise TypeError(
-            f"Expected 'message_text' to be a list, got {type(message_text)}"
-        )
-    if message_payload is not None and not isinstance(message_payload, list):
-        raise TypeError(
-            f"Expected 'message_payload' to be a list, got {type(message_payload)}"
-        )
+        # Construct the response data
+        response_data = {
+            "sessionInfo": {"parameters": parameters},
+            "fulfillmentResponse": (
+                {"messages": []}
+                if message_text or message_payload or message_conditional_payload
+                else None
+            ),
+        }
 
-    response = {}
-    if parameters:
-        response["sessionInfo"] = {"parameters": parameters}
-
-    if message_text or message_payload:
-        response["fulfillmentResponse"] = {"messages": []}
         if message_text:
-            for text in message_text:
-                response["fulfillmentResponse"]["messages"].append(
-                    {"text": {"text": [text]}}
-                )
+            response_data["fulfillmentResponse"]["messages"].extend(
+                [
+                    TextMessage(text=[text]).model_dump(mode="python")
+                    for text in message_text
+                ]
+            )
+
         if message_payload:
-            for payload in message_payload:
-                response["fulfillmentResponse"]["messages"].append({"payload": payload})
+            response_data["fulfillmentResponse"]["messages"].extend(
+                [
+                    MessagePayload(payload=payload).model_dump(mode="python")
+                    for payload in message_payload
+                ]
+            )
 
-    if message_conditional_payload:
-        response["fulfillmentResponse"]["messages"].append(message_conditional_payload)
+        if message_conditional_payload:
+            response_data["fulfillmentResponse"]["messages"].append(
+                ConditionalPayload(**message_conditional_payload).model_dump(
+                    mode="python"
+                )
+            )
 
-    return json.dumps(response)  # Return a JSON string
+        # Validate the final schema
+        validated_response = DialogflowResponse(**response_data)
+
+        # Return the JSON string
+        return validated_response.model_dump(mode="json")
+
+    except Exception as e:
+        error_msg = f"Error building Dialogflow response: {str(e)}"
+        import logging
+
+        logging.exception(error_msg)
+        return make_response(
+            tag=tag,
+            parameters={dynamic_status_key: "failed"},
+            message_text=[error_msg],
+            status="failed",
+        )
