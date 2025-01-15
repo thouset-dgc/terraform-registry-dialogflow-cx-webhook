@@ -14,10 +14,4 @@ class HandlerExample(HandlerBase):
                     "text": {"text": ["Hello, World!"]}
                 }
             ],
-            "message_conditional_payload": {
-                "condition": "true",
-                "payload": {
-                    "text": {"text": ["Hello, World!"]}
-                }
-            }
         }
