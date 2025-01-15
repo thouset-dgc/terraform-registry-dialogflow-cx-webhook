@@ -5,7 +5,7 @@ from utils.logger import get_logger
 
 factory = HandlerFactory()
 
-logger = get_logger("webhook")
+logger = get_logger(__name__)
 
 def webhook_entrypoint(request: Request):
     """
@@ -30,7 +30,7 @@ def webhook_entrypoint(request: Request):
         handler = factory(tag)
 
         response_data = handler(request_data)
-
+        
         # Build response with dynamic status (succeed)
         response = make_response(tag=tag, **response_data)
 
