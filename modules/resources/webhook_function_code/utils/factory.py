@@ -1,6 +1,7 @@
 from typing import Type, Dict
-from handlers import HandlerExample
 from utils.base import HandlerBase
+from handlers import HandlerExample
+
 
 class HandlerFactory:
     """Factory for creating handlers based on a tag."""
