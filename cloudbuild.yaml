@@ -1,0 +1,58 @@
+steps:
+- id: 'CONTEXT'
+  name: 'alpine'
+  entrypoint: sh
+  args:
+    - '-c'
+    - |
+      echo "********************************************"
+      echo "project           : $PROJECT_ID"
+      echo "branch            : $BRANCH_NAME"
+      echo "env               : ${_ENV}"
+      echo "mode              : $([[ ${_APPLY_CHNAGES} = 'true' ]] && echo 'LIVE' || echo 'DRY RUN')"
+      echo "********************************************"
+
+# [START tf-init]
+- id: 'Terraform init'
+  name: 'hashicorp/terraform:1.2.1'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    cd iac
+    TF_IN_AUTOMATION=1 terraform init -upgrade -backend-config=backend/backend_$_ENV.tfvars -input=false -no-color  
+# [END tf-init]
+
+# [START tf-plan]
+- id: 'Terraform plan'
+  name: 'hashicorp/terraform:1.2.1'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      cd iac
+      TF_IN_AUTOMATION=1 terraform plan -var-file=env/$_ENV.tfvars 
+# [END tf-plan]
+
+# [START tf-apply]
+- id: 'Terraform apply'
+  name: 'hashicorp/terraform:1.2.1'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      if [ "${_APPLY_CHANGES}" = 'true' ]; then
+        echo "********************************************"
+        echo "Applying changes on ${_ENV} environment"
+        echo "********************************************"
+        cd iac
+        TF_IN_AUTOMATION=1 terraform apply -auto-approve -var-file=env/$_ENV.tfvars  -input=false -no-color 
+      else
+        echo "*********************************************"
+        echo "Skipping apply (DRY RUN)"
+        echo "*********************************************"
+      fi
+# [END tf-apply]
+timeout: 5400s
+options:
+  logging: CLOUD_LOGGING_ONLY

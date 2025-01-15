@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environments
+.env
+.venv
+venv/
+env.bak/
+venv.bak/
+iac/.terraform
+iac/*.terraform
+iac/*.terraform.lock.hcl
+.vscode
+.idea/*
+
+# Zip
+cloud_function_zip/
