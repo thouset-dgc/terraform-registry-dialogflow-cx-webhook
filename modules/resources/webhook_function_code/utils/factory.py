@@ -1,6 +1,7 @@
-from typing import Type, Dict
-from utils.base import HandlerBase
+from typing import Dict, Type
+
 from handlers import HandlerExample
+from utils.base import HandlerBase
 
 
 class HandlerFactory:
