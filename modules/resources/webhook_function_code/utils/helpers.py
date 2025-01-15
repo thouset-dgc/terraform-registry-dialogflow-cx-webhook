@@ -32,11 +32,6 @@ def get_tag(query: dict) -> str:
         raise ValueError(
             "No 'tag' found in fullfillmentInfo. Check Dialogflow CX webhook settings or input data."
         )
-    except Exception as e:
-        import logging
-
-        logging.exception(f"An unexpected error occured : {e}")
-        raise
     # Return the extracted 'tag'
     return tag
 
