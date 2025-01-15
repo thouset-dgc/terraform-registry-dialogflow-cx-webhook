@@ -1,4 +1,1 @@
-cloud-sql-python-connector==1.15.0
-pymysql==1.1.1
-SQLAlchemy==2.0.36
-google-cloud-bigquery==3.27.0
+google-cloud-logging
