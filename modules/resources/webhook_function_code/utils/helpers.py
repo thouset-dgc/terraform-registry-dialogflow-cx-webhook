@@ -1,10 +1,7 @@
-from schemas.dialogflow import (
-    DialogflowResponse,
-    TextMessage,
-    MessagePayload,
-    ConditionalPayload,
-)
 from typing import Dict, List, Optional
+
+from schemas.dialogflow import (ConditionalPayload, DialogflowResponse,
+                                MessagePayload, TextMessage)
 
 
 def get_tag(query: dict) -> str:
@@ -111,9 +108,7 @@ def make_response(
 
     except Exception as e:
         error_msg = f"Error building Dialogflow response: {str(e)}"
-        import logging
-
-        logging.exception(error_msg)
+        
         return make_response(
             tag=tag,
             parameters={dynamic_status_key: "failed"},
