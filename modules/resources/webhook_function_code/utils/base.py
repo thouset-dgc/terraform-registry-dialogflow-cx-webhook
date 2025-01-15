@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+
 class HandlerBase(ABC):
     """Base class for all handlers."""
 
