@@ -26,10 +26,20 @@ variable "cloud_run_functions_setting" {
     ingress_settings      = string #(Ex: "ALLOW")
     service_account_email = string
     environment_vars      = map(any) #(Ex:  {LOG_EXECUTION_ID= true PROJECT_ID = var.project_id PROJECT_REGION = var.region PROJECT_CLOUD_SQL_INSTANCE = "chatbot"}
-    secret_env_vars = list(object({
+    secret_env_vars = optional(list(object({
       key     = string
       secret  = string
       version = string
+    })))
+    event_trigger = optional(object({
+      trigger_region = string
+      event_type     = string
+      event_filter = optional(object({
+        attribute = string
+        value     = string
+      }))
+      pubsub_topic = optional(string)
+      retry_policy = string
     }))
     source_dir  = string
     output_path = string
