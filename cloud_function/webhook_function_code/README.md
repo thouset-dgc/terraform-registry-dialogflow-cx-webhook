@@ -89,3 +89,21 @@ This example demonstrates how to use `make_response` to create a successful resp
 ## Error Handling
 The webhook includes comprehensive error handling for missing tags, unknown tags, and exceptions within the handler functions, returning appropriate error messages and status codes. Detailed logging helps in debugging.
 
+## Webhook Factory
+```
+webhook_function_code/
+├── handlers/
+│   ├── __init__.py
+│   ├── handler_a.py
+│   ├── handler_b.py
+├── services/
+│   ├── __init__.py
+├── utils/
+│   ├── __init__.py
+│   ├── base.py    # Définit HandlerBase
+│   ├── factory.py # Définit HandlerFactory
+│   ├── dialogflow_interface.py
+├── main.py
+├── README.md
+├── requirements.txt
+```
