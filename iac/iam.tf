@@ -42,6 +42,8 @@ resource "google_project_iam_member" "df_webhook_bindings" {
   member   = "serviceAccount:${google_service_account.service_account["df-webhook-${var.project_id}"].email}"
 }
 
+## You must create an instance of Dialogflow before applying this
+
 # resource "google_project_iam_member" "dialogflow_run_invoker" {
 #   project = var.project_id
 
