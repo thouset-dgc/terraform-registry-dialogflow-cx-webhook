@@ -25,7 +25,6 @@ def replace_in_handler_file(
 
 
 def update_init_file(init_file_path: str, class_name: str, handler_file_name: str):
-
     with open(init_file_path, "r") as file:
         filedata = file.read()
         lines = filedata.split("\n")
@@ -42,7 +41,7 @@ def update_init_file(init_file_path: str, class_name: str, handler_file_name: st
         # find the index of the last __all__ line
         all_index = -1
         for i, line in enumerate(lines):
-            if line.startswith(']'):
+            if line.startswith("]"):
                 all_index = i
 
         # insert the new import line
@@ -52,26 +51,29 @@ def update_init_file(init_file_path: str, class_name: str, handler_file_name: st
     with open(init_file_path, "w") as file:
         file.write("\n".join(lines))
 
-def update_factory_file(factory_file_path: str, class_name: str, handler_file_name: str):
+
+def update_factory_file(
+    factory_file_path: str, class_name: str, handler_file_name: str
+):
     """
-    from typing import Dict, Type
+        from typing import Dict, Type
 
-from handlers import (
-    HandlerExample,
-)
-from utils.base import HandlerBase
+    from handlers import (
+        HandlerExample,
+    )
+    from utils.base import HandlerBase
 
 
-class HandlerFactory:
-    _handlers: Dict[str, Type[HandlerBase]] = {
-        "handler_example": HandlerExample,
-    }
+    class HandlerFactory:
+        _handlers: Dict[str, Type[HandlerBase]] = {
+            "handler_example": HandlerExample,
+        }
 
-    def __call__(self, tag: str):
-        handler_class = self._handlers.get(tag)
-        if not handler_class:
-            raise ValueError(f"Unknown handler tag: {tag}")
-        return handler_class()
+        def __call__(self, tag: str):
+            handler_class = self._handlers.get(tag)
+            if not handler_class:
+                raise ValueError(f"Unknown handler tag: {tag}")
+            return handler_class()
 
     """
 
@@ -106,8 +108,9 @@ class HandlerFactory:
     with open(factory_file_path, "w") as file:
         file.write("\n".join(lines))
 
+
 def create_webhook(webhook_name: str):
-    ROOT = "modules/resources/webhook_function_code/"
+    ROOT = "src/"
     TEMPLATE_PATH = ROOT + "handlers/handler_example.py"
     NEW_HANDLER_PATH = ROOT + f"handlers/{webhook_name}.py"
     OLD_CLASS_NAME = "HandlerExample"
@@ -148,5 +151,6 @@ def create_webhook(webhook_name: str):
 if __name__ == "__main__":
     # read the arguments from the command line
     import sys
+
     webhook_name = sys.argv[1]
     create_webhook(webhook_name)
