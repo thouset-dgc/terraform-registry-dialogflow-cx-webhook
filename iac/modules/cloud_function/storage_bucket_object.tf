@@ -3,7 +3,7 @@ data "archive_file" "archive_function" {
   for_each    = var.cloud_run_functions_setting
   type        = "zip"
   source_dir  = each.value.source_dir
-  output_path = "${each.value.output_path}.zip"
+  output_path = "${each.value.output_path}/${each.value.function_name}.zip"
 
 }
 

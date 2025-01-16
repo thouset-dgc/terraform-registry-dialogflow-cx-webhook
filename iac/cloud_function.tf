@@ -27,8 +27,8 @@ module "gcp_cloud_functions" {
         }
       ]
 
-      source_dir  = "../cloud_function/webhook_function_code/"
-      output_path = "../cloud_function_zip/webhook_cloud_function"
+      source_dir  = "../cloud_function/webhook/src/"
+      output_path = "../cloud_function_zip/webhook"
     }
   }
 }
