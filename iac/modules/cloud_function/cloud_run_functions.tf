@@ -27,7 +27,7 @@ resource "google_cloudfunctions2_function" "cloud_function" {
     environment_variables = each.value.environment_vars
 
     dynamic "secret_environment_variables" {
-      for_each = each.value.secret_env_vars
+      for_each = each.value.secret_env_vars != null ? each.value.secret_env_vars : []
       content {
         project_id = var.project_id
         key        = secret_environment_variables.value.key
@@ -35,11 +35,22 @@ resource "google_cloudfunctions2_function" "cloud_function" {
         version    = secret_environment_variables.value.version
       }
     }
-    # secret_environment_variables {
-    #   key        = "CLOUD_SQL_SECRET"
-    #   project_id = var.project_id
-    #   secret     = google_secret_manager_secret.cloud_sql_secret.secret_id
-    #   version    = "latest"
-    # }
+
+  }
+  dynamic "event_trigger" {
+    for_each = each.value.event_trigger != null ? [each.value.event_trigger] : []
+    content {
+      trigger_region = event_trigger.value.trigger_region
+      event_type     = event_trigger.value.event_type
+      dynamic "event_filters" {
+        for_each = event_trigger.value.event_filter != null ? [event_trigger.value.event_filter] : []
+        content {
+          attribute = event_filters.value.attribute
+          value     = event_filters.value.value
+        }
+      }
+      pubsub_topic = event_trigger.value.pubsub_topic != null ? event_trigger.value.pubsub_topic : null
+      retry_policy = event_trigger.value.retry_policy
+    }
   }
 }
