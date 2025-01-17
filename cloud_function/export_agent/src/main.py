@@ -1,16 +1,15 @@
 import os
 from datetime import datetime
+
 import functions_framework
-from google.api_core.client_options import ClientOptions
-from google.cloud.dialogflowcx_v3 import (
-    AgentsClient,
-    ExportAgentRequest,
-)
-from cloudevents.http import CloudEvent
 import pytz
+from cloudevents.http import CloudEvent
+from google.api_core.client_options import ClientOptions
+from google.cloud.dialogflowcx_v3 import AgentsClient, ExportAgentRequest
 from logger import get_logger
 
 logger = get_logger(__name__)
+
 
 def export_agent(
     agent_id: str, bucket_name: str, file_name: str, environment: str, location: str
@@ -80,7 +79,6 @@ def execute_export_agent(cloud_event: CloudEvent) -> None:
         environment_id = os.getenv("DIALOGFLOW_PRD_ENVIRONMENT_ID")
     else:
         raise ValueError("Invalid source_environment")
-    
 
     file_name = f"agent-{agent_id}-{date}-{source_environment}-{blob_name}"
 
@@ -94,9 +92,7 @@ def execute_export_agent(cloud_event: CloudEvent) -> None:
         location=location,
     )
 
-    logger.info(
-        f"Agent Exported\n{agent_export_response}"
-    )
+    logger.info(f"Agent Exported\n{agent_export_response}")
 
 
 if __name__ == "__main__":
