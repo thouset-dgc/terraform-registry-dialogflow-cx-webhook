@@ -8,6 +8,9 @@ from google.cloud.dialogflowcx_v3 import (
 )
 from cloudevents.http import CloudEvent
 import pytz
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 def export_agent(
     agent_id: str, bucket_name: str, file_name: str, environment: str, location: str
@@ -34,9 +37,9 @@ def export_agent(
         environment=environment,
         # data_format=DataFormat.JSON_PACKAGE
     )
-    print(request)
+    logger.info(request)
     export_operation = agents_client.export_agent(request=request)
-    print("Exporting the Agent...")
+    logger.info("Exporting the Agent...")
 
     response = export_operation.result()
 
@@ -46,7 +49,7 @@ def export_agent(
 @functions_framework.cloud_event
 def execute_export_agent(cloud_event: CloudEvent) -> None:
     """
-    Executes the export of a virtual agent.
+    Executes the export of Dialogflow CX agent.
 
     Args:
         event: The event triggering the export (a Pub/Sub message).
@@ -91,7 +94,7 @@ def execute_export_agent(cloud_event: CloudEvent) -> None:
         location=location,
     )
 
-    print(
+    logger.info(
         f"Agent Exported\n{agent_export_response}"
     )
 
