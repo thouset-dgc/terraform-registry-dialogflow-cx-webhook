@@ -1,19 +1,12 @@
 import os
 
-from cloudevents.http import CloudEvent
 import functions_framework
-
+from cloudevents.http import CloudEvent
 from dfcx_scrapi.core.webhooks import Webhooks
-
-from google.cloud.dialogflowcx_v3beta1 import types
-from google.cloud.dialogflowcx_v3 import (
-    AgentsClient,
-    RestoreAgentRequest,
-)
 from google.api_core.client_options import ClientOptions
-
 from google.cloud import storage
-
+from google.cloud.dialogflowcx_v3 import AgentsClient, RestoreAgentRequest
+from google.cloud.dialogflowcx_v3beta1 import types
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -28,7 +21,9 @@ def move_file(source_bucket_name: str, destination_bucket_name: str, blob_path: 
         destination_bucket_name (str): The name of the destination bucket.
         blob_path (str): The path to the file to move.
     """
-    logger.info(f"Moving {blob_path} from {source_bucket_name} to {destination_bucket_name}")
+    logger.info(
+        f"Moving {blob_path} from {source_bucket_name} to {destination_bucket_name}"
+    )
     # connect to the Cloud Storage client
     storage_client = storage.Client()
 
@@ -146,7 +141,9 @@ def execute_restore_agent(cloud_event: CloudEvent) -> None:
             location=location,
         )
         # check the id token for the agent
-        check_id_token(agent_id=f"projects/{project_id}/locations/{location}/agents/{agent_id}")
+        check_id_token(
+            agent_id=f"projects/{project_id}/locations/{location}/agents/{agent_id}"
+        )
 
         # move the file to the archive bucket
         move_file(
