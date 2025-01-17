@@ -14,6 +14,10 @@ from google.api_core.client_options import ClientOptions
 
 from google.cloud import storage
 
+from logger import get_logger
+
+logger = get_logger(__name__)
+
 
 def move_file(source_bucket_name: str, destination_bucket_name: str, blob_path: str):
     """
@@ -24,7 +28,7 @@ def move_file(source_bucket_name: str, destination_bucket_name: str, blob_path: 
         destination_bucket_name (str): The name of the destination bucket.
         blob_path (str): The path to the file to move.
     """
-    print(f"Moving {blob_path} from {source_bucket_name} to {destination_bucket_name}")
+    logger.info(f"Moving {blob_path} from {source_bucket_name} to {destination_bucket_name}")
     # connect to the Cloud Storage client
     storage_client = storage.Client()
 
@@ -43,7 +47,7 @@ def move_file(source_bucket_name: str, destination_bucket_name: str, blob_path: 
     # delete the original blob
     blob.delete()
 
-    print(f"Moved {blob_path} to {destination_bucket_name}")
+    logger.info(f"Moved {blob_path} to {destination_bucket_name}")
 
 
 def restore_agent(agent_id: str, bucket_name: str, file_name: str, location: str):
@@ -68,13 +72,13 @@ def restore_agent(agent_id: str, bucket_name: str, file_name: str, location: str
         agent_uri=f"gs://{bucket_name}/{file_name}",
     )
 
-    print(request)
+    logger.info(request)
 
     restore_operation = agents_client.restore_agent(request=request)
-    print("Restoring the Agent...")
+    logger.info("Restoring the Agent...")
     response = restore_operation.result()
 
-    print(f"The Agent has successfully been restored to {agent_id}")
+    logger.info(f"The Agent has successfully been restored to {agent_id}")
     return response
 
 
@@ -97,7 +101,7 @@ def check_id_token(agent_id: str):
         # Update Webhook
         updated_webhook = w.update_webhook(webhook.name, generic_web_service=my_service)
 
-        print(f"{updated_webhook.display_name} updated to ID_TOKEN")
+        logger.info(f"{updated_webhook.display_name} updated to ID_TOKEN")
 
 
 @functions_framework.cloud_event
@@ -159,7 +163,7 @@ def execute_restore_agent(cloud_event: CloudEvent) -> None:
         )
 
         # give a complete log of the error
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
 
 
 if __name__ == "__main__":
